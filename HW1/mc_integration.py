@@ -65,7 +65,7 @@ class StratifiedMC(MCIntegration):
         # probability associated with each stratum for uniform grid
         prob = 1.0/self.n_strata
 
-        # number of samples per starta
+        # number of samples per strata
         m = int(prob * n_samples)
 
         # partition
@@ -87,4 +87,27 @@ class StratifiedMC(MCIntegration):
                     sample[1] = np.random.uniform(y_left, y_right)
                     samples.append(sample)
         
+        return samples
+
+# Latin Hypercube Monte Carlo estimator
+class LHSMC(MCIntegration):
+    def __init__(self, func):
+        name = 'Latin Hypercube Monte Carlo estimator'
+        MCIntegration.__init__(self, func, self.samples_generator, name)
+
+    @staticmethod
+    def samples_generator(n_samples):
+
+        samples = []
+        dims = 2
+        # uniform random permutation of {0,1,...,M-1}
+        pi = list(map(lambda x: np.random.permutation(n_samples), range(dims)))
+
+        for i in range(n_samples):
+            sample = np.zeros(dims)
+            for dim in range(dims):
+                u = np.random.uniform(0, 1)
+                sample[dim] = (pi[dim][i] + u) / n_samples
+            samples.append(sample)
+
         return samples

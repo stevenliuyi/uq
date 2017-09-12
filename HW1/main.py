@@ -10,7 +10,8 @@ def u2(y):
 n_samples = [100, 1000, 2000, 5000, 10000]
 
 estimators = [mci.PlainMC(u1),
-              mci.StratifiedMC(u1)]
+              mci.StratifiedMC(u1),
+              mci.LHSMC(u1)]
 
 for estimator in estimators:
     for n in n_samples:
