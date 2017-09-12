@@ -1,3 +1,12 @@
 # Uncertainty Quantification
 
 This repository contains homeworks for the course **ACMS 80770 Topics in Applied Mathematics (Uncertainty Quantification)** at University of Notre Dame.
+
+## Topics
+Below is a list of topics covered in each homework:
+* Homework 1
+  * plain Monte Carlo estimator
+  * stratified Monte Carlo estimator
+  * Latin Hypercube Monte Carlo estimator
+  * importance sampling Monte Carlo estimator
+  * control variate Monte Carlo estimator 
