@@ -1,14 +1,13 @@
 import numpy as np
 
 class MCIntegration:
-    def __init__(self, func, samples_generator, name, preconditioner=None):
+    def __init__(self, func, samples_generator, name):
         self.func = func
         self.samples_generator = samples_generator
         self.name = name
-        self.preconditioner = preconditioner
     
     def print_results(self):
-        print("=====================================")
+        print("=========================================")
         print(self.name)
         print("number of samples: %d" % self.n_samples)
         print("mean of estimator: %.8e" % self.mean)
@@ -23,8 +22,13 @@ class MCIntegration:
         for i in range(n_samples):
             vals.append(self.func(samples[i]))
 
-        if self.preconditioner is not None:
+        # only for importance sampling
+        if hasattr(self, 'preconditioner'):
             vals /= self.preconditioner
+
+        # only for control variate
+        if hasattr(self, 'beta'):
+            vals += self.beta * self.cv_expectation
 
         return np.mean(vals)
 
@@ -37,6 +41,7 @@ class MCIntegration:
             means.append(mean)
 
         self.mean = np.mean(means)
+
         self.variance = np.var(means)
 
         return (self.mean, self.variance)
@@ -187,4 +192,43 @@ class ImportanceSamplingMC(MCIntegration):
             preconditioner.append(modified_pdf[ix,iy])
 
         self.preconditioner = np.array(preconditioner)
+        return samples
+
+# Control Variate Monte Carlo estimator
+class ControlVariateMC(MCIntegration):
+    def __init__(self, func, control_variate, cv_expectation):
+        self.original_func = func
+        self.control_variate = control_variate
+        self.cv_expectation = cv_expectation
+        name = 'Control Variate Monte Carlo estimator'
+
+        MCIntegration.__init__(self, self.new_func, self.samples_generator, name)
+
+    def new_func(self, y):
+            return self.original_func(y) - self.beta * self.control_variate(y)
+
+    # estimator optimal coefficient
+    def calc_optimal_coefficient(self, n_samples):
+        g = []
+        h = []
+        for i in range(n_samples):
+            y = np.zeros(2)
+            for dim in range(len(y)):
+                y[dim] = np.random.uniform(0, 1)
+            g.append(self.original_func(y))
+            h.append(self.control_variate(y))
+        
+        cov = np.cov(g, h)
+        beta = cov[0,1] / cov[1,1]
+        return beta
+        
+    def samples_generator(self, n_samples):
+        self.beta = self.calc_optimal_coefficient(n_samples)
+
+        samples = []
+        for i in range(n_samples):
+            sample = np.zeros(2)
+            for dim in range(len(sample)):
+                sample[dim] = np.random.uniform(0, 1)
+            samples.append(sample)
         return samples
