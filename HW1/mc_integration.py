@@ -1,10 +1,11 @@
 import numpy as np
 
 class MCIntegration:
-    def __init__(self, func, samples_generator, name):
+    def __init__(self, func, samples_generator, name, preconditioner=None):
         self.func = func
         self.samples_generator = samples_generator
         self.name = name
+        self.preconditioner = preconditioner
     
     def print_results(self):
         print("=====================================")
@@ -21,6 +22,9 @@ class MCIntegration:
         vals = []
         for i in range(n_samples):
             vals.append(self.func(samples[i]))
+
+        if self.preconditioner is not None:
+            vals /= self.preconditioner
 
         return np.mean(vals)
 
@@ -110,4 +114,77 @@ class LHSMC(MCIntegration):
                 sample[dim] = (pi[dim][i] + u) / n_samples
             samples.append(sample)
 
+        return samples
+
+# Importance Sampling Monte Carlo estimator
+class ImportanceSamplingMC(MCIntegration):
+    def __init__(self, func):
+        name = 'Importance Sampling Monte Carlo estimator'
+        MCIntegration.__init__(self, func, self.samples_generator, name)
+
+    # use trapezoidal rule to approximate optimal pdf
+    def modified_pdf_generator(self, n_partitions=100):
+        # number of partitions in each direction
+        p = int(np.sqrt(n_partitions))
+
+        partition = np.linspace(0, 1, num=p+1)
+        
+        pdf = np.zeros((p, p))
+        e = 0.0 # approximation of E[g(y)]
+        for ix in range(p):
+            for iy in range(p):
+                x_left = partition[ix]
+                x_right = partition[ix+1]
+
+                y_left = partition[iy]
+                y_right = partition[iy+1]
+
+                x = np.random.uniform(x_left, x_right)
+                y = np.random.uniform(y_left, y_right)
+                pdf[ix, iy] = self.func([x, y])
+                e += pdf[ix, iy] * 1.0 / n_partitions
+        pdf /= e
+
+        return pdf
+        
+    def samples_generator(self, n_samples):
+        # obtain modified pdf
+        modified_pdf = self.modified_pdf_generator()
+
+        # number of partitions in each direction
+        p = modified_pdf.shape[0]
+        partition = np.linspace(0, 1, num=p+1)
+
+        # pdf in x direction
+        pdf_x = np.sum(modified_pdf, axis=1) / p
+        
+        # cpf in x direction
+        cdf_x = np.array(list(map(lambda x: np.sum(pdf_x[0:(x+1)]), range(p)))) / p
+
+        samples = []
+        preconditioner = [] # preconditioner
+        for i in range(n_samples):
+            # use inverse cdf to sample x
+            ux = np.random.uniform(0,1)
+            ix = np.searchsorted(cdf_x, ux)
+            x = np.random.uniform(partition[ix], partition[ix+1])
+
+            # pdf in y direction
+            pdf_y  = modified_pdf[ix,:]
+
+            # cdf in y direction
+            cdf_y = np.array(list(map(lambda x: np.sum(pdf_y[0:(x+1)]), range(p)))) / np.sum(pdf_y)
+
+            # use inverse cdf to sample y
+            uy = np.random.uniform(0,1)
+            iy = np.searchsorted(cdf_y, uy)
+            y = np.random.uniform(partition[iy], partition[iy+1])
+
+            sample = np.array([x, y])
+            samples.append(sample)
+
+            # set preconditioner
+            preconditioner.append(modified_pdf[ix,iy])
+
+        self.preconditioner = np.array(preconditioner)
         return samples

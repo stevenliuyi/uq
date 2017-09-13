@@ -9,11 +9,18 @@ def u2(y):
 
 n_samples = [100, 1000, 2000, 5000, 10000]
 
-estimators = [mci.PlainMC(u1),
-              mci.StratifiedMC(u1),
-              mci.LHSMC(u1)]
+estimators = [[mci.PlainMC(u1),
+               mci.StratifiedMC(u1),
+               mci.LHSMC(u1)],
+              [mci.PlainMC(u2),
+               mci.StratifiedMC(u2),
+               mci.LHSMC(u2),
+               mci.ImportanceSamplingMC(u2)]]
 
-for estimator in estimators:
-    for n in n_samples:
-        estimator.run(n)
-        estimator.print_results()
+for i in range(len(estimators)):
+    print("estimators for u%d:" % (i+1))
+    for estimator in estimators[i]:
+        for n in n_samples:
+            estimator.run(n)
+            estimator.print_results()
+    print("")
