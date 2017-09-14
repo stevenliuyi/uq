@@ -19,9 +19,7 @@ class MCIntegration:
         self.samples = self.samples_generator(n_samples)
 
         # function evaluatoin
-        vals = []
-        for i in range(n_samples):
-            vals.append(self.func(self.samples[i]))
+        vals = list(map(lambda i: self.func(self.samples[i]), range(n_samples)))
 
         # only for importance sampling
         if hasattr(self, 'preconditioner'):
@@ -36,10 +34,7 @@ class MCIntegration:
     def run(self, n_samples, n_repetitions=300):
         self.n_samples = n_samples
 
-        means = []
-        for i in range(n_repetitions):
-            mean = self.onetime_run(n_samples)
-            means.append(mean)
+        means = list(map(lambda i: self.onetime_run(n_samples), range(n_repetitions)))
 
         self.mean = np.mean(means)
 
