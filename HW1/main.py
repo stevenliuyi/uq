@@ -1,5 +1,6 @@
 import mc_integration as mci
 import numpy as np
+import matplotlib.pyplot as plt
 
 def u1(y):
     return 0.5 - (y[0]-0.5)**2 - (y[1]-0.5)**2
@@ -27,11 +28,32 @@ estimators = [[mci.PlainMC(u1),
                mci.ImportanceSamplingMC(u2),
                mci.ControlVariateMC(u2, u2_control_variate, u2_cv_expectation)]]
 
+variances = []
 for i in range(len(estimators)):
+    variances.append([])
     print("estimators for u%d:" % (i+1))
-    for estimator in estimators[i]:
+    for j in range(len(estimators[i])):
+        estimator = estimators[i][j]
+        variances[i].append([])
         for n in n_samples:
+            # Monte Carlo integration
             estimator.run(n)
             estimator.print_results()
             if (n == 100): estimator.plot_samples()
+
+            # record variance of the estimator
+            variances[i][j].append(estimator.variance)
     print("")
+
+# plot variance vs. n for all the estimators
+for i in range(len(estimators)):
+    plt.clf()
+    for j in range(len(estimators[i])):
+        plt.plot(n_samples,
+                 variances[i][j],
+                 label=estimators[i][j].name)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.legend(loc='lower left')
+    plt.savefig('u%d_estimators_variances.png' % (i+1))
+    print("variance vs. n plot for u%d(y) esitmators saved!" % (i+1))
