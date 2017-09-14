@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class MCIntegration:
     def __init__(self, func, samples_generator, name):
@@ -15,12 +16,12 @@ class MCIntegration:
 
     def onetime_run(self, n_samples):
         # generate samples
-        samples = self.samples_generator(n_samples)
+        self.samples = self.samples_generator(n_samples)
 
         # function evaluatoin
         vals = []
         for i in range(n_samples):
-            vals.append(self.func(samples[i]))
+            vals.append(self.func(self.samples[i]))
 
         # only for importance sampling
         if hasattr(self, 'preconditioner'):
@@ -45,6 +46,22 @@ class MCIntegration:
         self.variance = np.var(means)
 
         return (self.mean, self.variance)
+
+    def plot_samples(self):
+        samples_coord = np.array(self.samples).transpose()
+        plt.clf()
+        fig, ax = plt.subplots()
+        plt.plot(samples_coord[0], samples_coord[1], 'bo')
+        plt.axis([0,1,0,1])
+        plt.title('%s - %d samples' % (self.name, self.n_samples))
+        plt.gca().set_aspect('equal', adjustable='box')
+        ax.set_xticks(np.linspace(0, 1, 11))
+        ax.set_yticks(np.linspace(0, 1, 11))
+        plt.grid(b=True, color='k', linestyle='--')
+        plt.savefig('%s - %d samples' % (self.name, self.n_samples))
+        print("=========================================")
+        print("samples plot saved!")
+
 
 # Plain Monte Carlo estimator
 class PlainMC(MCIntegration):

@@ -33,4 +33,5 @@ for i in range(len(estimators)):
         for n in n_samples:
             estimator.run(n)
             estimator.print_results()
+            if (n == 100): estimator.plot_samples()
     print("")
