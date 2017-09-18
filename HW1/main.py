@@ -57,3 +57,6 @@ for i in range(len(estimators)):
     plt.legend(loc='lower left')
     plt.savefig('u%d_estimators_variances.png' % (i+1))
     print("variance vs. n plot for u%d(y) esitmators saved!" % (i+1))
+
+# save variances
+np.save('variances.npy', variances)
