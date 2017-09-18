@@ -16,7 +16,7 @@ def u2_control_variate(y):
 # exact solution for the control variate
 u2_cv_expectation = 2*(5+5*np.exp(18/5)-10*np.exp(6)+87*np.exp(39/5))/(45*np.exp(39/5))
 
-n_samples = [100, 1000, 2000, 5000, 10000]
+n_samples = [10, 100, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 estimators = [[mci.PlainMC(u1),
                mci.StratifiedMC(u1),

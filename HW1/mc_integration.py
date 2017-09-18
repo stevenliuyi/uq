@@ -81,6 +81,22 @@ class StratifiedMC(MCIntegration):
         name = 'Stratified Monte Carlo estimator'
         MCIntegration.__init__(self, func, self.samples_generator, name)
 
+    @staticmethod
+    def single_stratum_samples_generator(samples, partition, ix, iy, n):
+        x_left = partition[ix]
+        x_right = partition[ix+1]
+
+        y_left = partition[iy]
+        y_right = partition[iy+1]
+
+        for i in range(n):
+            sample = np.zeros(2)
+            sample[0] = np.random.uniform(x_left, x_right)
+            sample[1] = np.random.uniform(y_left, y_right)
+            samples.append(sample)
+
+        return samples
+
     def samples_generator(self, n_samples):
         # probability associated with each stratum for uniform grid
         prob = 1.0/self.n_strata
@@ -89,23 +105,30 @@ class StratifiedMC(MCIntegration):
         m = int(prob * n_samples)
 
         # partition
-        partition = np.linspace(0, 1, num=int(np.sqrt(self.n_strata))+1)
+        n_strata_one_direction = int(np.sqrt(self.n_strata))
+        partition = np.linspace(0, 1, num=n_strata_one_direction+1)
 
         samples = []
 
         for ix in range(len(partition)-1):
             for iy in range(len(partition)-1):
-                x_left = partition[ix]
-                x_right = partition[ix+1]
+                samples = self.single_stratum_samples_generator(samples,
+                                                                partition,
+                                                                ix, iy, m)
 
-                y_left = partition[iy]
-                y_right = partition[iy+1]
+        # remain number of samples
+        n_samples_remain = n_samples - self.n_strata**2 * m
 
-                for i in range(m):
-                    sample = np.zeros(2)
-                    sample[0] = np.random.uniform(x_left, x_right)
-                    sample[1] = np.random.uniform(y_left, y_right)
-                    samples.append(sample)
+        # non-zero when the number of samples is not multiple of the number of strata
+        if n_samples_remain > 0:
+            remains = np.random.choice(self.n_strata, n_samples_remain, replace=False)
+            for r in remains:
+                ix = int(r/n_strata_one_direction) 
+                iy = r%n_strata_one_direction
+
+                samples = self.single_stratum_samples_generator(samples,
+                                                                partition,
+                                                                ix, iy, 1)
         
         return samples
 
