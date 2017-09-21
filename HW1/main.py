@@ -1,23 +1,12 @@
+from func import *
 import mc_integration as mci
 import numpy as np
 import matplotlib.pyplot as plt
 
-def u1(y):
-    return 0.5 - (y[0]-0.5)**2 - (y[1]-0.5)**2
-
-def u2(y):
-    delta = 0.1
-    return 1/(abs(0.3-y[0]**2-y[1]**2) + delta)
-
-# a control variate for u2(y) 
-def u2_control_variate(y):
-    return 8 * np.exp(-np.abs(y[0]+y[1]-0.7)*6) + 2
-
-# exact solution for the control variate
-u2_cv_expectation = 2*(5+5*np.exp(18/5)-10*np.exp(6)+87*np.exp(39/5))/(45*np.exp(39/5))
-
+# number of samples
 n_samples = [10, 100, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
+# define Monte Carlo estimators
 estimators = [[mci.PlainMC(u1),
                mci.StratifiedMC(u1),
                mci.LHSMC(u1)],
@@ -29,18 +18,23 @@ estimators = [[mci.PlainMC(u1),
                mci.ControlVariateMC(u2, u2_control_variate, u2_cv_expectation)]]
 
 variances = []
+
+# Monte Carlo integration
+# loop through parametric responses
 for i in range(len(estimators)):
     variances.append([])
     print("estimators for u%d:" % (i+1))
+    # loop through estimators for a specific parametric response
     for j in range(len(estimators[i])):
         estimator = estimators[i][j]
         variances[i].append([])
         for n in n_samples:
             # Monte Carlo integration
-            estimator.run(n)
+            estimator.run(n) 
+            # print out estimator statistics
             estimator.print_results()
+            # generate a plot of samples when n = 100
             if (n == 100): estimator.plot_samples()
-
             # record variance of the estimator
             variances[i][j].append(estimator.variance)
     print("")
