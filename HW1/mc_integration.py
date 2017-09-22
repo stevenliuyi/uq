@@ -7,6 +7,7 @@ class MCIntegration:
         self.samples_generator = samples_generator
         self.name = name
     
+    # print out statistics
     def print_results(self):
         print("=========================================")
         print(self.name)
@@ -14,6 +15,24 @@ class MCIntegration:
         print("mean of estimator: %.8e" % self.mean)
         print("variance of estimator: %.8e" % self.variance)
 
+    # compute mean and variance in a single-pass
+    def calc_statistics(self, values):
+        num = len(values)
+        mu = values[0]
+        var = 0.0
+        for i in range(num-1):
+            delta = values[i+1] - mu
+            mu += 1/float(i+2) * delta
+            var += (i+1)/float(i+2) * delta**2
+        var /= num - 1
+
+        # compute with numpy
+        # mu = np.mean(values)
+        # var = np.var(values, ddof=1)
+
+        return (mu, var)
+
+    # run Monte Carlo integration once
     def onetime_run(self, n_samples):
         # generate samples
         self.samples = self.samples_generator(n_samples)
@@ -29,19 +48,23 @@ class MCIntegration:
         if hasattr(self, 'beta'):
             vals += self.beta * self.cv_expectation
 
-        return np.mean(vals)
+        # obtain statistics
+        mean, var = self.calc_statistics(vals)
 
+        return mean
+
+    # run Monte Carlo integration for many times and obtain statistics
     def run(self, n_samples, n_repetitions=300):
         self.n_samples = n_samples
 
         means = list(map(lambda i: self.onetime_run(n_samples), range(n_repetitions)))
 
-        self.mean = np.mean(means)
+        # mean and variance of the estimators
+        self.mean, self.variance = self.calc_statistics(means) 
 
-        self.variance = np.var(means)
+        return
 
-        return (self.mean, self.variance)
-
+    # plot generated samples
     def plot_samples(self):
         samples_coord = np.array(self.samples).transpose()
         plt.clf()
