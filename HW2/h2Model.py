@@ -168,5 +168,5 @@ if __name__ == "__main__":
   tm.plotModel(disps)
 
   # Get Centernode Disp
-  print disps[1,2]
+  print(disps[1,2])
 
