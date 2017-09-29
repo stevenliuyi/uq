@@ -4,9 +4,13 @@ This repository contains homeworks for the course **ACMS 80770 Topics in Applied
 
 ## Topics
 Below is a list of topics covered in each homework:
-* Homework 1
+* Homework 1 (Monte Carlo integration)
   * plain Monte Carlo estimator
   * stratified Monte Carlo estimator
   * Latin Hypercube Monte Carlo estimator
   * importance sampling Monte Carlo estimator
   * control variate Monte Carlo estimator 
+
+* Homework 2 (Quasi Monte Carlo methods)
+  * Faure sequence
+  * Sobol sequence
