@@ -56,11 +56,11 @@ class QuasiMC:
         self.seq = self.get_sequence(n_samples)
 
         # obtain properties
-        young = self.get_samples(self.seq.get()[:self.tm.totTruss,:], 190.0e9, 210.0e9)
-        area = self.get_samples(self.seq.get()[self.tm.totTruss:,:], 12.0e-4, 16.0e-4)
+        young = self.get_samples(self.seq.get()[:,:self.tm.totTruss], 190.0e9, 210.0e9)
+        area = self.get_samples(self.seq.get()[:,self.tm.totTruss:], 12.0e-4, 16.0e-4)
 
         # solve model
-        disp = list(map(lambda i: self.tm.solve(young[:,i], area[:,i])[1,2],
+        disp = list(map(lambda i: self.tm.solve(young[i,:], area[i,:])[1,2],
             range(n_samples)))
 
         # obtain statistics
