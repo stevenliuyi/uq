@@ -42,6 +42,9 @@ class QuasiMC:
         elif (self.seq_name == 'faure'):
             self.display_name = 'Quasi Monte Carlo with Faure sequence'
             return seq.HaltonSeq(n_samples, self.tm.totTruss*2, faure=True)
+        elif (self.seq_name == 'sobol'):
+            self.display_name = 'Quasi Monte Carlo with Sobol sequence'
+            return seq.SobolSeq(n_samples, self.tm.totTruss*2)
 
     # map uniformly distributed samples in [0,1] to [a,b]
     @staticmethod
