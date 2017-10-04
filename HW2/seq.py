@@ -3,17 +3,18 @@ from sympy import nextprime
 
 # Halton and Faure sequence
 class HaltonSeq:
-    def __init__(self, n_samples, dim, faure=False):
+    def __init__(self, n_samples, dim, faure=False, initial_base=3):
         self.n_samples = n_samples
         self.dim = dim
         self.faure = faure
-        self.seq = self.generate_halton_seq()
+        self.seq = self.generate_halton_seq(initial_base)
 
     # generate Halton sequence
-    def generate_halton_seq(self):
+    # initial_base is the base for the first dimension
+    def generate_halton_seq(self, initial_base):
 
         seq = []
-        base = 2 # initial value
+        base = initial_base - 1 # initial value
         for d in range(self.dim):
             base = nextprime(base)
             seq.append([self.vdc(i,base) for i in range(self.n_samples)])
