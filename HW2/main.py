@@ -8,7 +8,7 @@ estimators = [QuasiMC('faure'),
               QuasiMC('plain')] # add plain Monte Carlo for comparison
 
 # number of samples
-n_samples = [10, 100, 1000, 10000]
+n_samples = [10, 100, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 q1 = [] # mean
 q2 = [] # variance
@@ -40,7 +40,7 @@ for i in range(2):
     # use symlog here because displacements could be negative
     plt.yscale('symlog') 
     plt.legend(loc='lower right' if i == 0 else 'upper right')
-    plt.savefig('Q%d.png' % (i+1))
+    plt.savefig('Q%d.png' % (i+1), bbox_inches='tight')
     print('statistics v. n plot for Q%d save!' % (i+1))
 
 # save statistics
