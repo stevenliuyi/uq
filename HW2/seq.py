@@ -130,3 +130,17 @@ class SobolSeq:
 
     def get(self):
         return self.seq
+
+# random sequence for plain Monte Carlo 
+class RandomSeq:
+    def __init__(self, n_samples, dim):
+        self.n_samples = n_samples
+        self.dim = dim
+        self.seq = self.generate_random_seq()
+
+    def generate_random_seq(self):
+        return np.random.uniform(size=(self.n_samples, self.dim))
+    
+    def get(self):
+        return self.seq
+

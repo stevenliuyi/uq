@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 
 # quasi-Monte Carlo estimators
 estimators = [QuasiMC('faure'),
-              QuasiMC('sobol')]
+              QuasiMC('sobol'),
+              QuasiMC('plain')] # add plain Monte Carlo for comparison
 
 # number of samples
 n_samples = [10, 100, 1000, 10000]
@@ -38,7 +39,7 @@ for i in range(2):
     plt.xscale('log')
     # use symlog here because displacements could be negative
     plt.yscale('symlog') 
-    plt.legend(loc='lower left')
+    plt.legend(loc='lower right' if i == 0 else 'upper right')
     plt.savefig('Q%d.png' % (i+1))
     print('statistics v. n plot for Q%d save!' % (i+1))
 

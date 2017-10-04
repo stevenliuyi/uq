@@ -38,3 +38,13 @@ plt.show()
 # check the last two dimensions
 plt.plot(sobol2[:,10], sobol2[:,11], 'o')
 plt.show()
+
+# random sequence (12 dimensions)
+halton = seq.RandomSeq(1000, 12).get()
+
+# check the first two dimensions
+plt.plot(halton[:,0], halton[:,1], 'o')
+plt.show()
+# check the last two dimensions
+plt.plot(halton[:,10], halton[:,11], 'o')
+plt.show()

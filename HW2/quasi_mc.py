@@ -45,6 +45,11 @@ class QuasiMC:
         elif (self.seq_name == 'sobol'):
             self.display_name = 'Quasi Monte Carlo with Sobol sequence'
             return seq.SobolSeq(n_samples, self.tm.totTruss*2)
+        else:
+            if (self.seq_name != 'plain'):
+                print("Cannot find sequence named '%s', will use plain Monte Carlo instead." % self.seq_name)
+            self.display_name = 'Plain Monte Carlo'
+            return seq.RandomSeq(n_samples, self.tm.totTruss*2)
 
     # map uniformly distributed samples in [0,1] to [a,b]
     @staticmethod
