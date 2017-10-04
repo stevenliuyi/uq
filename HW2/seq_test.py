@@ -21,7 +21,7 @@ faure = seq.HaltonSeq(1000,12,faure=True,initial_base=5).get()
 plot(faure, 'Faure sequence')
 
 # first 10 Sobol points in 3 dimensions
-# (same example as on http://web.maths.unsw.edu.edu/~fkuo/sobol/ )
+# (same example as on http://web.maths.unsw.edu.au/~fkuo/sobol/ )
 sobol = seq.SobolSeq(10, 3).get()
 print('First 10 Sobol points in 3 dimensions:')
 print(sobol)
