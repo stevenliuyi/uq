@@ -27,10 +27,11 @@ for i in range(len(estimators)):
         q1[i].append(estimators[i].mean)
         q2[i].append(estimators[i].variance)
 
-# plot statistics v. number of samples
+# plots
 for i in range(2):
     values = q1 if i == 0 else q2
 
+    # plot statistics v. number of samples
     plt.clf()
     for j in range(len(estimators)):
         plt.plot(n_samples,
@@ -41,7 +42,20 @@ for i in range(2):
     plt.yscale('symlog') 
     plt.legend(loc='lower right' if i == 0 else 'upper right')
     plt.savefig('Q%d.png' % (i+1), bbox_inches='tight')
-    print('statistics v. n plot for Q%d save!' % (i+1))
+    print('statistics v. n plot for Q%d saved!' % (i+1))
+
+    # plot relative rate of change v. number of samples
+    plt.clf()
+    for j in range(len(estimators)):
+        plt.plot(n_samples,
+                 # numpy version >= 1.13 required to compute gradient
+                 abs(np.gradient(values[j], n_samples) / values[j]),
+                 label=estimators[j].display_name)
+    plt.xscale('log')
+    plt.yscale('log') 
+    plt.legend(loc='lower left')
+    plt.savefig('Q%d_relative_rate_of_change.png' % (i+1), bbox_inches='tight')
+    print('relative rate of change v. n plot for Q%d saved!' % (i+1))
 
 # save statistics
 np.save('q1.npy', q1)
