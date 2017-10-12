@@ -11,6 +11,17 @@ class OrthogPoly:
 
         self.generate_polys()
         
+    @staticmethod
+    def poly_func(f):
+        return lambda z: np.polyval(f, z)
+
+    def inner_product(self, f1, f2):
+        return integrate.quad(lambda y: f1(y)*f2(y)*self.weight_func(y),
+                              self.a, self.b)[0]
+
+    def length(self, f):
+        return np.sqrt(self.inner_product(f, f))
+
     def generate_polys(self):
         self.polys = [np.poly1d([0]) for i in range(self.n+1)]
 
@@ -22,14 +33,12 @@ class OrthogPoly:
             
             ypn1 = pn1 * np.poly1d([1,0])
             # <p_(n-1), y*p_(n-1)>
-            inner1 = integrate.quad(lambda z: np.polyval(pn1*ypn1, z)*self.weight_func(z),
-                                    self.a, self.b)[0]
+            inner1 = self.inner_product(self.poly_func(pn1),
+                                        self.poly_func(ypn1))
             # <p_(n-1), p_(n-1)>
-            inner2 = integrate.quad(lambda z: np.polyval(pn1*pn1, z)*self.weight_func(z),
-                                    self.a, self.b)[0]
+            inner2 = self.length(self.poly_func(pn1))**2
             # <p_(n-2), p_(n-2)>
-            inner3 = integrate.quad(lambda z: np.polyval(pn2*pn2, z)*self.weight_func(z),
-                                    self.a, self.b)[0]
+            inner3 = self.length(self.poly_func(pn2))**2
             # alpha_(n-1)
             alpha = inner1 / inner2
             # beta_(n-1)
@@ -42,6 +51,4 @@ class OrthogPoly:
         # normalization
         for n in range(1,self.n+1):
             pn = self.polys[n]
-            self.polys[n] = pn / np.sqrt( \
-                    integrate.quad(lambda z: np.polyval(pn*pn, z)*self.weight_func(z),
-                                   self.a, self.b)[0])
+            self.polys[n] = pn / self.length(self.poly_func(pn))
