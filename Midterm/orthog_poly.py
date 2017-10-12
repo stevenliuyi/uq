@@ -3,11 +3,14 @@ import numpy as np
 from scipy import integrate
 
 class OrthogPoly:
-    def __init__(self, n, a, b, weight_func):
+    def __init__(self, n, a, b, weight_func, quad_rule=None):
         self.n = n # order of polynomial
         self.a = a # lower bound
         self.b = b # upper bound
         self.weight_func = weight_func
+
+        # nodes and weights for integration
+        self.quad_rule = quad_rule
 
         self.generate_polys()
         
@@ -16,8 +19,18 @@ class OrthogPoly:
         return lambda z: np.polyval(f, z)
 
     def inner_product(self, f1, f2):
-        return integrate.quad(lambda y: f1(y)*f2(y)*self.weight_func(y),
-                              self.a, self.b)[0]
+        if (self.quad_rule is None):
+            # quad rule not provided
+            # use scipy.integrate.quad to calculate integration
+            return integrate.quad(lambda y: f1(y)*f2(y)*self.weight_func(y),
+                                  self.a, self.b)[0]
+        else:
+            # use provided nodes and weights to calculate integration
+            nodes = self.quad_rule[0]
+            weights = self.quad_rule[1]
+            return np.sum(weights * [f1(y)*f2(y)*self.weight_func(y) \
+                    for y in nodes])
+            
 
     def length(self, f):
         return np.sqrt(self.inner_product(f, f))
