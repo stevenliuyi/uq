@@ -62,6 +62,6 @@ class OrthogPoly:
             self.polys[n] = pn
         
         # normalization
-        for n in range(1,self.n+1):
+        for n in range(0,self.n+1):
             pn = self.polys[n]
             self.polys[n] = pn / self.length(self.poly_func(pn))
