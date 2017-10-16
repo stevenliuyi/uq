@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from clenshaw_curtis import *
+from quad import *
 from orthog_poly import *
 from scipy.special import legendre, jacobi, chebyt
 
@@ -40,6 +40,35 @@ print('weight distance norm: %e' % (np.linalg.norm(weights-ex_weights, 2)))
 plt.plot(points, weights, label='computed')
 plt.plot(ex_points, ex_weights, label='benchmark')
 plt.title('nodes and weights for the Clenshaw Curtis rule')
+plt.legend(loc='lower left')
+plt.show()
+
+# -----------------------------
+# test Gauss quad rule
+print('')
+print('===========================')
+print('Gauss quad rule test')
+print('===========================')
+print('')
+points, weights = gauss(-1,1,4)
+
+ex_points = [-np.sqrt((15+2*np.sqrt(30))/35),
+             -np.sqrt((15-2*np.sqrt(30))/35),
+              np.sqrt((15-2*np.sqrt(30))/35),
+              np.sqrt((15+2*np.sqrt(30))/35)]
+
+ex_weights = [(18-np.sqrt(30))/36,
+              (18+np.sqrt(30))/36,
+              (18+np.sqrt(30))/36,
+              (18-np.sqrt(30))/36]
+
+print('point distance norm: %e' % (np.linalg.norm(points-ex_points, 2)))
+print('weight distance norm: %e' % (np.linalg.norm(weights-ex_weights, 2)))
+
+# plot nodes and weights for comparison
+plt.plot(points, weights, label='computed')
+plt.plot(ex_points, ex_weights, label='benchmark')
+plt.title('nodes and weights for the Gauss-Legendre rule')
 plt.legend(loc='lower left')
 plt.show()
 
