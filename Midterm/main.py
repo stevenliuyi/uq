@@ -38,3 +38,13 @@ plt.legend(loc='upper left', ncol=3)
 plt.title('first %d orthogonal polynomials' % (order+1))
 plt.savefig('first_%d_orthgonal_polynomials.png' % (order+1))
 print('polynomial plot is saved!')
+
+
+# Golub-Welsch algorithm
+orthog_poly = OrthogPoly(order, bounds[0], bounds[1], weight_func, cc)
+jacobi = orthog_poly.get_jacobi()
+x, v = np.linalg.eig(jacobi) # x is list of nodes (eigenvalues)
+
+# weights
+beta0 = orthog_poly.betas[0]
+w = v[0,:]**2 * beta0

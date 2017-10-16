@@ -12,6 +12,9 @@ class OrthogPoly:
         # nodes and weights for integration
         self.quad_rule = quad_rule
 
+        self.alphas = []
+        self.betas = []
+
         self.generate_polys()
         
     @staticmethod
@@ -40,6 +43,7 @@ class OrthogPoly:
 
         self.polys[0] = np.poly1d([1]) # p_0(y)
         
+        self.alphas = []; self.betas = []
         for n in range(1, self.n+1):
             pn1 = self.polys[n-1] # p_(n-1)(y)
             pn2 = self.polys[n-2] if n != 1 else np.poly1d([0]) # p_(n-2)(y)
@@ -60,8 +64,27 @@ class OrthogPoly:
             # obtain p_n(y) by three-term recurrence
             pn = np.poly1d([1,-alpha])*pn1 - beta*pn2
             self.polys[n] = pn
+
+            # record alpha and beta
+            self.alphas.append(alpha)
+            self.betas.append(beta)
         
         # normalization
         for n in range(0,self.n+1):
             pn = self.polys[n]
             self.polys[n] = pn / self.length(self.poly_func(pn))
+
+        # set beta0
+        self.betas[0] = 1 / self.polys[0].c[0]**2
+
+    # return the Jacobi matrix
+    def get_jacobi(self):
+        jacobi = np.zeros((self.n, self.n))
+        for i in range(0, self.n):
+            jacobi[i, i] = self.alphas[i]
+
+        for i in range(1, self.n):
+            jacobi[i-1,i] = np.sqrt(self.betas[i])
+            jacobi[i,i-1] = np.sqrt(self.betas[i])
+
+        return jacobi
