@@ -1,6 +1,7 @@
 # obtain orthogonal polynomials using three-term recurrence
 import numpy as np
 from scipy import integrate
+import types
 
 class OrthogPoly:
     def __init__(self, n, a, b, weight_func, quad_rule=None):
@@ -17,23 +18,24 @@ class OrthogPoly:
 
         self.generate_polys()
         
-    @staticmethod
-    def poly_func(f):
-        return lambda z: np.polyval(f, z)
-
     def inner_product(self, f1, f2):
-        if (self.quad_rule is None):
-            # quad rule not provided
-            # use scipy.integrate.quad to calculate integration
-            return integrate.quad(lambda y: f1(y)*f2(y)*self.weight_func(y),
-                                  self.a, self.b)[0]
+        # weight function is not type of poly1d, use numerical integration
+        if type(self.weight_func) is types.LambdaType:
+            if (self.quad_rule is None):
+                # quad rule not provided
+                # use scipy.integrate.quad to calculate integration
+                return integrate.quad(lambda y: f1(y)*f2(y)*self.weight_func(y),
+                                      self.a, self.b)[0]
+            else:
+                # use provided nodes and weights to calculate integration
+                nodes = self.quad_rule[0]
+                weights = self.quad_rule[1]
+                return np.sum(weights * [f1(y)*f2(y)*self.weight_func(y) \
+                        for y in nodes])
+        # weight function is type of poly1d, use exact integration for polynomials
         else:
-            # use provided nodes and weights to calculate integration
-            nodes = self.quad_rule[0]
-            weights = self.quad_rule[1]
-            return np.sum(weights * [f1(y)*f2(y)*self.weight_func(y) \
-                    for y in nodes])
-            
+            inner_product_int = np.polyint(f1*f2*self.weight_func)
+            return inner_product_int(self.b) - inner_product_int(self.a)
 
     def length(self, f):
         return np.sqrt(self.inner_product(f, f))
@@ -50,12 +52,11 @@ class OrthogPoly:
             
             ypn1 = pn1 * np.poly1d([1,0])
             # <p_(n-1), y*p_(n-1)>
-            inner1 = self.inner_product(self.poly_func(pn1),
-                                        self.poly_func(ypn1))
+            inner1 = self.inner_product(pn1, ypn1)
             # <p_(n-1), p_(n-1)>
-            inner2 = self.length(self.poly_func(pn1))**2
+            inner2 = self.length(pn1)**2
             # <p_(n-2), p_(n-2)>
-            inner3 = self.length(self.poly_func(pn2))**2
+            inner3 = self.length(pn2)**2
             # alpha_(n-1)
             alpha = inner1 / inner2
             # beta_(n-1)
@@ -72,7 +73,7 @@ class OrthogPoly:
         # normalization
         for n in range(0,self.n+1):
             pn = self.polys[n]
-            self.polys[n] = pn / self.length(self.poly_func(pn))
+            self.polys[n] = pn / self.length(pn)
 
         # set beta0
         self.betas[0] = 1 / self.polys[0].c[0]**2

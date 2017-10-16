@@ -29,7 +29,7 @@ print('coefficent distance norm: %e' % (np.linalg.norm(polys[order].c-sp_polys[o
 
 x = np.linspace(bounds[0], bounds[1], 100)
 print('')
-print('coefficents:')
+print('coefficients:')
 for poly in polys:
     print('%dth order polynomial: %s' % (poly.order, ', '.join(map(str, poly.c))))
     plt.plot(x, np.polyval(poly, x), label='order %d' % poly.order)
