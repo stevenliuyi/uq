@@ -14,3 +14,8 @@ Below is a list of topics covered in each homework:
 * Homework 2 (Quasi Monte Carlo methods)
   * Faure sequence
   * Sobol sequence
+
+* Midterm (Numerical integration)
+  * Clenshaw-Curtis quadrature rule
+  * Gauss quadrature rule
+  * Gauss-Kronrod quadrature rule
