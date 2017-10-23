@@ -73,6 +73,57 @@ plt.legend(loc='lower left')
 plt.show()
 
 # -----------------------------
+# test Gauss-Kronrod quad rule
+print('')
+print('===========================')
+print('Gauss-Kronrod rule test')
+print('===========================')
+print('')
+points, weights = gauss_kronrod(-1,1,7)
+
+ex_points = [-0.991455371120813,
+             -0.949107912342759,
+             -0.864864423359769,
+             -0.741531185599394,
+             -0.586087235467691,
+             -0.405845151377397,
+             -0.207784955007898,
+              0.000000000000000,
+              0.207784955007898,
+              0.405845151377397,
+              0.586087235467691,
+              0.741531185599394,
+              0.864864423359769,
+              0.949107912342759,
+              0.991455371120813]
+
+ex_weights = [0.022935322010529,
+              0.063092092629979,
+              0.104790010322250,
+              0.140653259715525,
+              0.169004726639267,
+              0.190350578064785,
+              0.204432940075298,
+              0.209482141084728,
+              0.204432940075298,
+              0.190350578064785,
+              0.169004726639267,
+              0.140653259715525,
+              0.104790010322250,
+              0.063092092629979,
+              0.022935322010529]
+
+print('point distance norm: %e' % (np.linalg.norm(points-ex_points, 2)))
+print('weight distance norm: %e' % (np.linalg.norm(weights-ex_weights, 2)))
+
+# plot nodes and weights for comparison
+plt.plot(points, weights, label='computed')
+plt.plot(ex_points, ex_weights, label='benchmark')
+plt.title('nodes and weights for the Gauss-Kronrod rule')
+plt.legend(loc='lower left')
+plt.show()
+
+# -----------------------------
 # test orthogonal polynomials
 print('')
 print('===========================')
