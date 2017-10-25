@@ -20,21 +20,44 @@ weight_func = lambda y: gamma(alpha+beta)/gamma(alpha)/gamma(beta) \
         *((y-loc)/scale)**(alpha-1) * (1-(y-loc)/scale)**(beta-1)
 
 # use Clenshaw-Curtis to obtain orthogonal polynomials
-polys = OrthogPoly(order, bounds[0], bounds[1], weight_func, cc).polys
-
-# for comparison, use scipy.integrate.quad to obtain orthogonal polynomials
-sp_polys = OrthogPoly(order, bounds[0], bounds[1], weight_func).polys
-
-print('coefficent distance norm: %e' % (np.linalg.norm(polys[order].c-sp_polys[order].c,2)))
+polys = OrthogPoly(order, bounds[0], bounds[1], weight_func, cc)
 
 x = np.linspace(bounds[0], bounds[1], 100)
 print('')
 print('coefficients:')
-for poly in polys:
+for poly in polys.polys:
     print('%dth order polynomial: %s' % (poly.order, ', '.join(map(str, poly.c))))
     plt.plot(x, np.polyval(poly, x), label='order %d' % poly.order)
 plt.yscale('symlog')
 plt.legend(loc='upper left', ncol=3)
 plt.title('first %d orthogonal polynomials' % (order+1))
 plt.savefig('first_%d_orthgonal_polynomials.png' % (order+1))
-print('polynomial plot is saved!')
+
+# Gauss quad rule
+nodes, weights = gauss_with_polys(polys)
+print('')
+print('Gauss quad rule')
+print('nodes:')
+print(nodes)
+print('weights:')
+print(weights)
+plt.clf()
+plt.plot(nodes, weights)
+plt.title('nodes and weights for Gauss quad rule')
+plt.savefig('Gauss_quad_rule.png')
+print('Gauss quad rule plot is saved!')
+
+# Guass-Kronrod quad rule
+for n in [3]:
+    nodes, weights = gauss_kronrod_with_polys(n, polys)
+    print('')
+    print('Gauss-Kronrod quad rule (%d points)' % (2*n+1))
+    print('nodes:')
+    print(nodes)
+    print('weights:')
+    print(weights)
+    plt.clf()
+    plt.plot(nodes, weights)
+    plt.title('nodes and weights for Gauss-Kronrod quad rule (%d points)' % (2*n+1))
+    plt.savefig('Gauss_Kronrod_quad_rule_%d_points.png' % (2*n+1))
+    print('Gauss-Kronrod quad rule (%d points) plot is saved!' % (2*n+1))
