@@ -35,7 +35,8 @@ class OrthogPoly:
         # weight function is type of poly1d, use exact integration for polynomials
         else:
             inner_product_int = np.polyint(f1*f2*self.weight_func)
-            return inner_product_int(self.b) - inner_product_int(self.a)
+            return np.longdouble(inner_product_int(self.b)) - \
+                   np.longdouble(inner_product_int(self.a))
 
     def length(self, f):
         return np.sqrt(self.inner_product(f, f))
