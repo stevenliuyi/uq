@@ -56,13 +56,18 @@ def gauss_with_polys(orthog_polys):
 
     return x[sort_index], w[sort_index]
 
-# Gauss-Kronrod quad rule (Laurie's algorithm)
+# Gauss-Kronrod quad rule
 def gauss_kronrod(a, b, n, weight_func=None):
     if weight_func is None:
         weight_func = np.poly1d([1])
 
     # orthogonal polynomials for Gauss quad rule
     orthog_polys = OrthogPoly(int(np.ceil(1.5*n))+1, a, b, weight_func)
+
+    return gauss_kronrod_with_polys(n, orthog_polys)
+
+# Laurie's algorithm (orthogonal polynomials for old system provided)
+def gauss_kronrod_with_polys(n, orthog_polys):
 
     # a and b initialization
     a = np.zeros(2*n+1)
