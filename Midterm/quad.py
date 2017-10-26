@@ -67,6 +67,7 @@ def gauss_kronrod(a, b, n, weight_func=None):
     return gauss_kronrod_with_polys(n, orthog_polys)
 
 # Laurie's algorithm (orthogonal polynomials for old system provided)
+# reference: Laurie 1997 Calculation of Gauss-Kronrod Quadrature Rules (appendix A)
 def gauss_kronrod_with_polys(n, orthog_polys):
 
     # a and b initialization
@@ -79,50 +80,49 @@ def gauss_kronrod_with_polys(n, orthog_polys):
     b[:(b_idx+1)] = orthog_polys.betas[:(b_idx+1)]
 
     # initialization
-    sigma = np.zeros((n+2, n+2))
-    # sigma_(0,0)
-    sigma[1,1] = 1.0
-    # sigma_(-1,l), l = 0,...,n
-    for l in range(n+1): sigma[0,l+1] = 0.0
-    # sigma_(k,n), k = 1,...,n-1
-    for k in range(1,n): sigma[k+1,n+1] = 0.0
-    # sigma_(k,l), l=1,...,n-2, k=l+1,l+2
-    for l in range(1,n-1):
-        sigma[l+2,l+1] = 0.0
-        sigma[l+3,l+1] = 0.0
+    s = np.zeros(int(np.floor(n/2.0))+2)
+    t = np.zeros(int(np.floor(n/2.0))+2)
+    t[1] = b[n+1]
 
     # eastward phase (Salzer's algorithm)
     for m in range(n-1):
-        for k in range(int(np.ceil(m/2.0)),-1,-1):
-            l = m - k
-            sigma[k+1,l+2] = sigma[k+2,l+1] + (a[k+n+1]-a[l])*sigma[k+1,l+1] \
-                    + b[k+n+1]*sigma[k,l+1] - b[l]*sigma[k+1,l]
+        k0 = int(np.floor((m+1)/2.0))
+        k = np.arange(int(np.floor((m+1)/2.0)),-1,-1)
+        l = m - k
+        s[k+1] = np.cumsum((a[k+n+1]-a[l])*t[k+1] + b[k+n+1]*s[k] - b[l]*s[k+1])
+        s, t = t, s # swap
+
+    j = int(np.floor(n/2.0)) + 1
+    s[1:(j+1)] = s[:j]
 
     # southward phase (Sack-Donovan-Wheeler algorithm)
     for m in range(n-1,2*n-2):
-        for k in range(m+1-n,int(np.ceil(m/2.0))+1):
-            l = m - k
-            sigma[k+2,l+1] = sigma[k+1,l+2] - (a[k+n+1]-a[l])*sigma[k+1,l+1] \
-                    - b[k+n+1]*sigma[k,l+1] + b[l]*sigma[k+1,l]
-            if m % 2 == 0: # m is even
-                a[k+n+1] = a[k] + (sigma[k+1,k+2]-b[k+n+1]*sigma[k,k+1]) \
-                        / sigma[k+1,k+1]
-            else: # m is odd
-                b[k+n+1] = sigma[k+1,k+1] / sigma[k,k]
-
+        k = np.arange(m+1-n,int(np.floor((m-1)/2.0))+1)
+        l = m - k
+        j = n - 1 - l
+        s[j+1] = np.cumsum(-(a[k+n+1]-a[l])*t[j+1] - b[k+n+1]*s[j+1] + b[l]*s[j+2])
+        j = j[-1]
+        if m % 2 == 0: # even
+            k = int(m/2)
+            a[k+n+1] = a[k] + (s[j+1] - b[k+n+1]*s[j+2]) / t[j+2]
+        else: # odd
+            k = int((m+1)/2)
+            b[k+n+1] = s[j+1] / s[j+2]
+        s, t = t, s
+    
     # termination
-    a[2*n] = a[n-1] - b[2*n]*sigma[n-1,n]/sigma[n,n]
+    a[2*n] = a[n-1] - b[2*n]*s[1]/t[1]
 
     # matrix T_(2n+1)
-    t = np.zeros((2*n+1,2*n+1))
+    mat_t = np.zeros((2*n+1,2*n+1))
     for i in range(2*n+1):
-        t[i, i] = a[i]
+        mat_t[i, i] = a[i]
     for i in range(1, 2*n+1):
-        t[i-1,i] = np.sqrt(b[i])
-        t[i,i-1] = np.sqrt(b[i])
+        mat_t[i-1,i] = np.sqrt(b[i])
+        mat_t[i,i-1] = np.sqrt(b[i])
 
     # obtain eigenvalues and eigenvectors of T
-    x, v = np.linalg.eig(t)
+    x, v = np.linalg.eig(mat_t)
     
     # weights
     w = v[0,:]**2 * b[0]

@@ -48,7 +48,7 @@ plt.savefig('Gauss_quad_rule.png')
 print('Gauss quad rule plot is saved!')
 
 # Guass-Kronrod quad rule
-for n in [3]:
+for n in [2, 3]:
     nodes, weights = gauss_kronrod_with_polys(n, polys)
     print('')
     print('Gauss-Kronrod quad rule (%d points)' % (2*n+1))

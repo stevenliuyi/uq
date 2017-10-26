@@ -248,21 +248,21 @@ plt.legend(loc='lower left')
 plt.show()
 
 # obtain Gauss-Kronrod nodes and weights wrt beta distribution
-for order in [3]:
+for order in [2, 3, 4]:
     points, weights = gauss_kronrod_with_polys(order,orthogPoly)
     plt.plot(points, weights)
     plt.title('nodes and weights for the Gauss-Kronrod quad rule (%d points)' % (2*order+1))
     plt.show()
     
     print('')
-    print('===== use orthogonal polynomials wrt beta distribution =====')
+    print('===== use orthogonal polynomials wrt beta distribution (%d points) =====' % (2*order+1))
     integration = np.sum(weights*[1 for x in points])
     print('integrate 1 wrt beta distribtion from 1 to 5: %f' % integration)
     print('error: %e' % (integration-4))
 
     # obtain corresponding Gauss nodes and weights 
-    orthogPoly = OrthogPoly(order, 1, 5, weight_func=weight_func)
-    points_gauss, weights_gauss = gauss_with_polys(orthogPoly)
+    gaussOrthogPoly = OrthogPoly(order, 1, 5, weight_func=weight_func)
+    points_gauss, weights_gauss = gauss_with_polys(gaussOrthogPoly)
 
     # make sure Gauss-Kronode nodes contain Gauss nodes
     print('')
