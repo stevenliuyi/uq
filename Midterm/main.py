@@ -9,7 +9,7 @@ bounds = [1, 5] # lower and upper bounds
 alpha = 2; beta = 5 # parameters for beta distribution
 
 # Clenshaw-Curtis rule
-cc_order = order*2+1+(alpha-1)+(beta-1)
+cc_order = order*2+(alpha-1)+(beta-1)
 cc = clenshaw_curtis(bounds[0], bounds[1], cc_order+1)
 print('order of Clenshaw-Curtis quadrature rule: %d' % cc_order)
 
@@ -30,8 +30,8 @@ for poly in polys.polys:
     plt.plot(x, np.polyval(poly, x), label='order %d' % poly.order)
 plt.yscale('symlog')
 plt.legend(loc='upper left', ncol=3)
-plt.title('first %d orthogonal polynomials' % (order+1))
-plt.savefig('first_%d_orthgonal_polynomials.png' % (order+1))
+plt.title('first %d orthonormal polynomials' % (order+1))
+plt.savefig('first_%d_orthonormal_polynomials.png' % (order+1))
 
 # Gauss quad rule
 nodes, weights = gauss_with_polys(polys)
