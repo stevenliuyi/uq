@@ -1,12 +1,16 @@
 import numpy as np
 import chaospy as cp
+from optimization import *
 
-class OrthogPolyOptimization:
-    def __init__(self, x, y, rho='uniform', order=None, support=None, a=0.5, b=0.5, mu=0, sigma=1, shape=1, scale=1):
+class OrthogPolyOptimization(Optimization):
+    def __init__(self, x, y, rho='uniform', order=None, support=None, a=0.5, b=0.5, mu=0, sigma=1, shape=1, scale=1, opt_method=None):
         self.x = np.array(x)
         self.y = np.array(y)
 
         self.dim = self.x.shape[1]
+
+        # optimization method
+        super().__init__(opt_method)
 
         support = self.get_support(rho, support)
 
@@ -34,16 +38,15 @@ class OrthogPolyOptimization:
         # polynomial chaos expansion
         self.yfit = cp.fit_regression(orthog_polys, self.x.T, self.y)
 
-    @staticmethod
-    def get_support(rho, support):
+    def get_support(self, rho, support):
         if rho == 'uniform': # Legendre chaos
             if support is None:
-                support = np.vstack((-np.ones(self.dim), np.ones(self.dim)))
+                support = np.vstack((-np.ones(self.dim), np.ones(self.dim))).T
             else:
                 support = np.array(support)
         elif rho == 'beta': # Jacobi chaos
             if support is None:
-                support = np.vstack((np.zeros(self.dim), np.ones(self.dim)))
+                support = np.vstack((np.zeros(self.dim), np.ones(self.dim))).T
             else:
                 support = np.array(support)
 
@@ -55,13 +58,6 @@ class OrthogPolyOptimization:
     def minimize(self, bounds):
         bounds = np.array(bounds)
 
-        # generate Monte Carlo points
-        x_mc = np.random.uniform(bounds[:,0],
-                                 bounds[:,1],
-                                 size=(10000,self.dim))
-        y_mc = [self.predict(x) for x in x_mc]  
-
-        self.xbest = x_mc[np.argmin(y_mc)]
-        self.ybest = np.amin(y_mc)
+        self.xbest, self.ybest = self.optimization(self.predict, bounds)
 
         return self.ybest

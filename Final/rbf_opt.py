@@ -1,8 +1,9 @@
 import numpy as np
 import scipy as sp
+from optimization import *
 
-class RBFOptimization:
-    def __init__(self, x, y, kernel='inverse'):
+class RBFOptimization(Optimization):
+    def __init__(self, x, y, kernel='inverse', opt_method=None):
         self.x = np.array(x)
         self.y = np.array(y)
         self.n = x.shape[0]
@@ -15,6 +16,9 @@ class RBFOptimization:
 
         # calculate coefficients
         self.alpha = np.linalg.solve(m, y).flatten()
+
+        # optimization method
+        super().__init__(opt_method)
 
     def kernel_func(self, x, y):
         if self.kernel == 'inverse': # inverse-quadratic RBF
@@ -39,11 +43,6 @@ class RBFOptimization:
     def minimize(self, bounds):
         bounds = np.array(bounds)
 
-        # generate Monte Carlo points
-        x_mc = np.random.uniform(bounds[:,0],
-                                 bounds[:,1],
-                                 size=(10000,self.dim))
-        y_mc = [self.interpolate(x) for x in x_mc]  
+        self.xbest, self.ybest = self.optimization(self.interpolate, bounds)
 
-        self.xbest = x_mc[np.argmin(y_mc)]
-        self.ybest = np.amin(y_mc)
+        return self.ybest

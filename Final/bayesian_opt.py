@@ -2,9 +2,10 @@ import numpy as np
 import sklearn.gaussian_process as gp
 from scipy import stats
 import matplotlib.pyplot as plt
+from optimization import *
 
-class BayesianOptimization:
-    def __init__(self, bounds, kernel='m52'):
+class BayesianOptimization(Optimization):
+    def __init__(self, bounds, kernel='m52', opt_method=None):
 
         # bounds for all parameters
         self.bounds = np.array(bounds)
@@ -27,6 +28,9 @@ class BayesianOptimization:
                                                n_restarts_optimizer=10,
                                                normalize_y=True)
 
+        # optimization method
+        super().__init__(opt_method)
+
     # initial points
     def initialize(self, x, y):
         self.x = np.array(x)
@@ -45,24 +49,19 @@ class BayesianOptimization:
 
     def minimize(self):
         # update the best y
-        ymin = np.amin(self.y)
-        xmin = self.x[np.argmin(self.y)]
+        self.ybest = np.amin(self.y)
+        self.xbest = self.x[np.argmin(self.y)]
 
         # fit Gaussian Process
         self.gpr.fit(self.x, self.y)
 
-        # generate Monte Carlo points for x
-        x_mc = np.random.uniform(self.bounds[:,0],
-                                 self.bounds[:,1],
-                                 size=(10000,self.dim))
+        self.x_next, _ = self.optimization(lambda x: -self.acq_func(x.reshape((1,-1)), self.ybest),
+                                           self.bounds)
 
-        a_mc = self.acq_func(x_mc, ymin)
-
-        self.x_next = x_mc[np.nanargmax(a_mc)]
-
-    # acquisition function (expected improvment)
+    # acquisition function (expected improvement)
     def acq_func(self, x, ymin):
         mean, std = self.gpr.predict(x, return_std=True)
+        if std == 0: std = 1e-10 # prevent NaN for gamma
         gamma = (ymin - mean) / std
         return std*(gamma*stats.norm.cdf(gamma) + stats.norm.pdf(gamma))
 
