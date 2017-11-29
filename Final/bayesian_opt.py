@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from optimization import *
 
 class BayesianOptimization(Optimization):
-    def __init__(self, bounds, kernel='m52', opt_method=None):
+    def __init__(self, bounds, kernel='m52', tol=1e-5, opt_method=None):
 
         # bounds for all parameters
         self.bounds = np.array(bounds)
@@ -22,6 +22,9 @@ class BayesianOptimization(Optimization):
         elif kernel == 'se':
             # squared exponential kernel
             kernel = gp.kernels.RBF()
+
+        # tolerance
+        self.tol = tol
             
         # Gaussian Process regressor
         self.gpr = gp.GaussianProcessRegressor(kernel=kernel,
@@ -36,6 +39,8 @@ class BayesianOptimization(Optimization):
         self.x = np.array(x)
         self.y = np.array(y)
 
+        self.converged = False
+
         self.minimize()
 
     # udpate y value for x_next
@@ -46,6 +51,10 @@ class BayesianOptimization(Optimization):
         self.y = np.append(self.y, y)
 
         self.minimize()
+
+        # check convergence
+        if np.linalg.norm(self.x_next-self.xbest) < self.tol:
+            self.converged = True
 
     def minimize(self):
         # update the best y
