@@ -53,10 +53,11 @@ class OrthogPolyOptimization(Optimization):
         return support
 
     def predict(self, xi):
-        if type(xi) is list:
-            return self.yfit(*xi)
-        else: # for 1D
+        xi = np.array([xi]).flatten()
+        if xi.shape[0] == 1: # for 1D
             return self.yfit(xi)
+        else: 
+            return self.yfit(*list(xi))
 
     def minimize(self, bounds):
         bounds = np.array(bounds)
